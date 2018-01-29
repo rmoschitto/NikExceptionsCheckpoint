@@ -47,8 +47,8 @@ public class TechnicalRequirementsTest {
                 verifier.assertInvokeThrows(NoServiceException, "verify", "10012").getMessage(),
                 "Expected Verifier to throw a NoServiceException with the correct message");
 
-        Enhancer Subclass = Verifier.subclassWithComplexMethods(m -> m
-                .put("verify", (args) -> {
+        InstanceProxy newVerifier = Verifier.subclass()
+                .intercept("verify", (args) -> {
                     if (args.length == 0) throw new RuntimeException("You called Verifier.verify with no arguments");
 
                     switch ((String) args[0]) {
@@ -61,9 +61,7 @@ public class TechnicalRequirementsTest {
                     }
                     return "This should never happen";
                 })
-        );
-
-        Object newVerifier = Subclass.create();
+                .build();
 
         ClassProxy Processor = ClassProxy
                 .classNamed("com.galvanize.ZipCodeProcessor")
